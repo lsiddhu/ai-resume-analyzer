@@ -29,6 +29,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route
+          path="/"
+          element={
+            <PublicRoute>
+              <Navigate to="/login" replace />
+            </PublicRoute>
+          }
+        />
 
         <Route
           path="/login"

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-const API_URL = import.meta.env.VITE_API_URL;
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 function Register() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ function Register() {
   });
 
   const [message, setMessage] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -25,88 +27,97 @@ function Register() {
     e.preventDefault();
 
     setMessage("");
+    setIsSuccess(false);
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/auth/register`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch(`${API_URL}/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setMessage(data.message || "Registration failed");
+        setMessage(data.message || "Registration failed.");
+        setIsSuccess(false);
         return;
       }
 
-      setMessage("Registration successful! Redirecting...");
+      setIsSuccess(true);
+      setMessage("Account created successfully! Redirecting to sign in...");
 
       setTimeout(() => {
         navigate("/login");
-      }, 1000);
+      }, 1200);
     } catch (error) {
-      setMessage("Unable to connect to server");
+      setIsSuccess(false);
+      setMessage("Unable to connect to server. Please check your backend.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-
-      <div className="w-full max-w-md">
-
-        {/* Project Name */}
-        <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-slate-900">
-            Resume ATS Analyzer
-          </h1>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Create an account to analyze your resume
-          </p>
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        {/* Brand Header */}
+        <div className="flex items-center justify-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm ring-1 ring-slate-900/10">
+            <svg
+              className="h-6 w-6"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <path d="M9 15h6" />
+              <path d="M9 11h6" />
+              <path d="M9 19h3" />
+            </svg>
+          </div>
+          <div>
+            <span className="text-xl font-bold tracking-tight text-slate-900">
+              ResumeIQ
+            </span>
+          </div>
         </div>
 
-        {/* Register Card */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <h2 className="mt-5 text-center text-2xl font-bold tracking-tight text-slate-900">
+          Create an account
+        </h2>
+        <p className="mt-1 text-center text-xs text-slate-500">
+          Start optimizing your resume for ATS algorithms today
+        </p>
+      </div>
 
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-slate-900">
-              Create Account
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Enter your details to get started.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-
-            {/* Name */}
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-7 shadow-xs sm:p-9">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Full Name */}
             <div>
               <label
                 htmlFor="name"
-                className="mb-1.5 block text-sm font-medium text-slate-700"
+                className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5"
               >
                 Full Name
               </label>
-
               <input
                 id="name"
                 type="text"
                 name="name"
-                placeholder="Enter your full name"
+                placeholder="Alex Morgan"
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition sm:text-sm"
               />
             </div>
 
@@ -114,20 +125,19 @@ function Register() {
             <div>
               <label
                 htmlFor="email"
-                className="mb-1.5 block text-sm font-medium text-slate-700"
+                className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5"
               >
-                Email
+                Work Email
               </label>
-
               <input
                 id="email"
                 type="email"
                 name="email"
-                placeholder="Enter your email"
+                placeholder="name@company.com"
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition sm:text-sm"
               />
             </div>
 
@@ -135,78 +145,86 @@ function Register() {
             <div>
               <label
                 htmlFor="password"
-                className="mb-1.5 block text-sm font-medium text-slate-700"
+                className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5"
               >
                 Password
               </label>
-
               <input
                 id="password"
                 type="password"
                 name="password"
-                placeholder="Create a password"
+                placeholder="At least 6 characters"
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                minLength={6}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition sm:text-sm"
               />
-
-              <p className="mt-1.5 text-xs text-slate-400">
-                Use a password that you can remember.
-              </p>
             </div>
 
-            {/* Register Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loading ? "Creating Account..." : "Register"}
-            </button>
-
-          </form>
-
-          {/* Message */}
-          {message && (
-            <div
-              className={`mt-4 rounded-lg border px-4 py-3 ${
-                message.includes("successful")
-                  ? "border-green-200 bg-green-50"
-                  : "border-red-200 bg-red-50"
-              }`}
-            >
-              <p
-                className={`text-sm ${
-                  message.includes("successful")
-                    ? "text-green-700"
-                    : "text-red-600"
+            {/* Status Feedback */}
+            {message && (
+              <div
+                className={`rounded-lg border p-3 text-xs leading-5 ${
+                  isSuccess
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                    : "border-rose-200 bg-rose-50 text-rose-800"
                 }`}
               >
                 {message}
-              </p>
-            </div>
-          )}
+              </div>
+            )}
 
-          {/* Login Link */}
+            {/* Submit CTA */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-slate-800 active:bg-slate-950 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+              >
+                {loading ? (
+                  <>
+                    <svg
+                      className="h-4 w-4 animate-spin text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      />
+                    </svg>
+                    <span>Creating account...</span>
+                  </>
+                ) : (
+                  <span>Create account</span>
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* Footer note */}
           <div className="mt-6 border-t border-slate-100 pt-5 text-center">
-            <p className="text-sm text-slate-500">
+            <p className="text-xs text-slate-500">
               Already have an account?{" "}
               <Link
                 to="/login"
-                className="font-medium text-blue-600 hover:text-blue-700"
+                className="font-semibold text-slate-900 hover:underline underline-offset-2"
               >
-                Login
+                Sign in
               </Link>
             </p>
           </div>
-
         </div>
-
-        <p className="mt-5 text-center text-xs text-slate-400">
-          Resume ATS Analyzer
-        </p>
-
       </div>
     </div>
   );
